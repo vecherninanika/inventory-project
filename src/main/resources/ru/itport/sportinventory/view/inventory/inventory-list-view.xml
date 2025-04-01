@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://inventoryListView.title"
+      focusComponent="inventoriesDataGrid">
+    <data>
+        <collection id="inventoriesDc"
+                    class="ru.itport.sportinventory.entity.Inventory">
+            <fetchPlan extends="_base">
+                <property name="category" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="inventoriesDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Inventory e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="inventoriesDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createButton" action="inventoriesDataGrid.create"/>
+            <button id="editButton" action="inventoriesDataGrid.edit"/>
+            <button id="removeButton" action="inventoriesDataGrid.remove"/>
+            <simplePagination id="pagination" dataLoader="inventoriesDl"/>
+        </hbox>
+        <dataGrid id="inventoriesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="inventoriesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="create" type="list_create"/>
+                <action id="edit" type="list_edit"/>
+                <action id="remove" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="name" header="msg://column.header"/>
+                <column property="category" header="msg://column.category"/>
+                <column property="description" header="msg://column.description"/>
+                <column property="photo" header="msg://column.photo"/>
+                <column property="maxReservationPeriod" header="msg://maxReservationPeriod"/>
+                <column property="quantity" header="msg://quantity"/>
+                <column property="quantityFree" header="msg://quantityFree"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>
