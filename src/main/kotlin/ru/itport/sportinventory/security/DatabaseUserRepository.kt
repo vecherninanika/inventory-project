@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
 @Primary
-@Component("ApplicationUserRepository")
+@Component("AppUserRepository")
 open class DatabaseUserRepository : AbstractDatabaseUserRepository<User>() {
 
     override fun getUserClass(): Class<User> = User::class.java

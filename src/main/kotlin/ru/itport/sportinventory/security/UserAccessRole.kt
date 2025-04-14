@@ -20,6 +20,7 @@ interface UserAccessRole {
     @EntityPolicy(entityName = "*", actions = [EntityPolicyAction.READ])
     @EntityPolicy(entityName = "BookingJournal", actions = [EntityPolicyAction.READ, EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE, EntityPolicyAction.DELETE])
     @EntityPolicy(entityName = "Inventory", actions = [EntityPolicyAction.READ, EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE, EntityPolicyAction.DELETE])
-    @SpecificPolicy(resources = ["rest.enabled", "rest.fileDownload.enabled"])
+    @EntityPolicy(entityName = "BrokenEquipmentReport", actions = [EntityPolicyAction.READ, EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE, EntityPolicyAction.DELETE])
+    @SpecificPolicy(resources = ["rest.enabled", "rest.fileDownload.enabled", "rest.fileUpload.enabled"])
     fun user()
 }

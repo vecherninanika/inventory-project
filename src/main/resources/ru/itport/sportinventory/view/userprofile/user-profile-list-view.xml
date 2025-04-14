@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="msg://userListView.title"
-      focusComponent="usersDataGrid">
+      title="msg://userProfileListView.title"
+      focusComponent="userProfilesDataGrid">
     <data>
-        <collection id="usersDc"
-                    class="ru.itport.sportinventory.entity.User">
-            <fetchPlan extends="_base"/>
-            <loader id="usersDl" readOnly="true">
+        <collection id="userProfilesDc"
+                    class="ru.itport.sportinventory.entity.UserProfile">
+            <fetchPlan extends="_base">
+                <property name="user" fetchPlan="_instance_name"/>
+            </fetchPlan>
+            <loader id="userProfilesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from User e]]>
+                    <![CDATA[select e from UserProfile e]]>
                 </query>
             </loader>
         </collection>
@@ -27,19 +29,19 @@
     </actions>
     <layout>
         <genericFilter id="genericFilter"
-                       dataLoader="usersDl">
+                       dataLoader="userProfilesDl">
             <properties include=".*"/>
         </genericFilter>
         <hbox id="buttonsPanel" classNames="buttons-panel">
-            <button id="createButton" action="usersDataGrid.create"/>
-            <button id="editButton" action="usersDataGrid.edit"/>
-            <button id="removeButton" action="usersDataGrid.remove"/>
-            <simplePagination id="pagination" dataLoader="usersDl"/>
+            <button id="createButton" action="userProfilesDataGrid.create"/>
+            <button id="editButton" action="userProfilesDataGrid.edit"/>
+            <button id="removeButton" action="userProfilesDataGrid.remove"/>
+            <simplePagination id="pagination" dataLoader="userProfilesDl"/>
         </hbox>
-        <dataGrid id="usersDataGrid"
+        <dataGrid id="userProfilesDataGrid"
                   width="100%"
                   minHeight="20em"
-                  dataContainer="usersDc"
+                  dataContainer="userProfilesDc"
                   columnReorderingAllowed="true">
             <actions>
                 <action id="create" type="list_create"/>
@@ -47,12 +49,8 @@
                 <action id="remove" type="list_remove"/>
             </actions>
             <columns resizable="true">
-                <column property="username"/>
-                <column property="firstName"/>
-                <column property="lastName"/>
-                <column property="email"/>
-                <column property="active"/>
-                <column property="timeZoneId"/>
+                <column property="user"/>
+                <column property="telegramId"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions" visible="false">

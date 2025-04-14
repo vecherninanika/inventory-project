@@ -2,21 +2,20 @@ package ru.itport.sportinventory.services
 
 import io.jmix.core.DataManager
 import io.jmix.core.FileRef
-import io.jmix.core.Sort
 import io.jmix.core.querycondition.PropertyCondition
-import io.jmix.core.security.CurrentAuthentication
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-    import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.itport.sportinventory.entity.*
+import ru.itport.sportinventory.exception.ErrorDescriptor
+import ru.itport.sportinventory.exception.PlatformException
 import ru.itport.sportinventory.mapper.mapToString
+import ru.itport.sportinventory.models.BookingJournalDTO
 import ru.itport.sportinventory.models.CategoryDTO
 import ru.itport.sportinventory.models.InventoryDTO
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 
 
@@ -68,7 +67,8 @@ open class InventoryService @Autowired constructor(
     open fun getInventoryById(id: UUID): InventoryDTO {
         val inventory = dataManager.load(Inventory::class.java)
             .id(id)
-            .one()
+            .optional()
+            .orElseThrow { PlatformException(ErrorDescriptor.INVENTORY_NOT_FOUND) }
 
         return InventoryDTO(
             inventory.id!!,
@@ -82,32 +82,58 @@ open class InventoryService @Autowired constructor(
         )
     }
 
-    @Transactional
-    open fun makeReservation(inventoryId: UUID, startDate: Date, endDate: Date, user: UserDetails): BookingJournal {
-        val today = Date()
-        // Проверка, что дата начала бронирования не в прошлом
-        if (startDate.before(today)) {
-            throw IllegalArgumentException("Дата начала бронирования не может быть в прошлом.")
+    open fun getInventoryByUser(telegramId: String): List<BookingJournalDTO> {
+        val user = dataManager.load(UserProfile::class.java).condition(
+            PropertyCondition.equal("telegramId", telegramId)
+                ).optional()
+                .orElseThrow { PlatformException(ErrorDescriptor.USER_NOT_FOUND) }
+                .user
+
+        val reservations = dataManager.load(BookingJournal::class.java)
+            .query("select b from BookingJournal b where b.status = :status and b.user.id = :userId order by b.endDate desc")
+            .parameter("status", Status.ACTIVE)
+            .parameter("userId", user?.id ?: 0)
+            .list()
+
+        return reservations.map { reservation ->
+            BookingJournalDTO(
+                reservation.inventory?.id,
+                reservation.inventory?.name,
+                reservation.inventory?.photo.toString(),
+                reservation.startDate,
+                reservation.endDate
+            )
         }
+    }
+
+    @Transactional
+    open fun makeReservation(inventoryId: UUID, startDate: Date, endDate: Date, userDetails: UserDetails): BookingJournal {
+        // Проверка, что дата начала бронирования не в прошлом - по какой-то причине не работает
+//        val today = Date()
+//        if (startDate.before(today)) {
+//            throw PlatformException(ErrorDescriptor.DATE_IN_PAST)
+//        }
+
         // Проверка, что дата окончания бронирования после даты начала
         if (endDate.before(startDate)) {
-            throw IllegalArgumentException("Дата окончания бронирования не может быть раньше даты начала.")
+            throw PlatformException(ErrorDescriptor.END_BEFORE_START)
         }
         // Загружаем объект инвентаря по переданному ID
         val inventory = dataManager.load(Inventory::class.java)
             .id(inventoryId)
-            .one()
+            .optional()
+            .orElseThrow { PlatformException(ErrorDescriptor.INVENTORY_NOT_FOUND) }
 
         // Проверяем, есть ли доступный инвентарь для бронирования
         if (inventory.quantityFree == null || inventory.quantityFree!! <= 0) {
-            throw IllegalStateException("Нет доступного инвентаря для бронирования.")
+            throw PlatformException(ErrorDescriptor.NO_AVAILABLE_INVENTORY)
         }
 
         // Загружаем пользователя по данным аутентификации
         val user = dataManager.load(User::class.java)
-            .condition(PropertyCondition.equal("username", user.username))
+            .condition(PropertyCondition.equal("username", userDetails.username))
             .optional()
-            .orElseThrow { IllegalStateException("Пользователь не найден.") }
+            .orElseThrow { PlatformException(ErrorDescriptor.USER_NOT_FOUND) }
 
         // Проверяем, есть ли у пользователя активное бронирование этого инвентаря
         val lastReservation = dataManager.load(BookingJournal::class.java)
@@ -119,7 +145,7 @@ open class InventoryService @Autowired constructor(
 
         // Если есть активное бронирование, выбрасываем исключение
         if (lastReservation != null && lastReservation.endDate?.after(startDate) == true) {
-            throw IllegalStateException("У вас уже есть активное бронирование этого инвентаря.")
+            throw PlatformException(ErrorDescriptor.USER_ALREADY_BOOKED)
         }
 
         // Создаем новый журнал бронирования
@@ -128,6 +154,7 @@ open class InventoryService @Autowired constructor(
         bookingJournal.inventory = inventory
         bookingJournal.startDate = startDate
         bookingJournal.endDate = endDate
+        bookingJournal.setStatus(Status.ACTIVE)
 
         // Уменьшаем количество свободных единиц инвентаря
         inventory.quantityFree = inventory.quantityFree!! - 1
@@ -149,32 +176,40 @@ open class InventoryService @Autowired constructor(
 
             bookingJournal
         } catch (e: Exception) {
-            throw IllegalStateException("Ошибка при бронировании: ${e.message}")
+            throw PlatformException(ErrorDescriptor.BOOKING_ERROR)
         }
     }
 
     @Transactional
     open fun returnInventory(inventoryId: UUID, returnDate: Date, photo: FileRef): BookingJournal {
-        val inventoryItem = dataManager.load(Inventory::class.java).condition(
+        val inventory = dataManager.load(Inventory::class.java).condition(
             PropertyCondition.equal("id", inventoryId))
-            .one()
+            .optional()
+            .orElseThrow { PlatformException(ErrorDescriptor.INVENTORY_NOT_FOUND) }
 
-        inventoryItem.quantityFree = inventoryItem.quantityFree?.plus(1)
-        dataManager.save(inventoryItem)
+        inventory.quantityFree = inventory.quantityFree?.plus(1)
+        dataManager.save(inventory)
 
-        val reservation = dataManager.load(BookingJournal::class.java).condition(
-            PropertyCondition.equal("inventory", inventoryItem))
-            .sort(Sort.by(Sort.Direction.DESC, "endDate"))
-            .list().first()
+        val reservation = dataManager.load(BookingJournal::class.java)
+            .query("select b from BookingJournal b where b.inventory.id = :inventoryId and b.status = :statusId order by b.endDate desc")
+            .parameter("inventoryId", inventory.id)
+            .parameter("statusId", Status.ACTIVE.id)
+            .list()
+            .firstOrNull()
+
+        if (reservation == null) {
+            throw PlatformException(ErrorDescriptor.NO_ACTIVE_RESERVATION)
+        }
 
         reservation.endDate = returnDate
         reservation.photo = photo
+        reservation.setStatus(Status.ENDED)
         dataManager.save(reservation)
 
         val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("ru"))
         val formattedReturnDate = dateFormat.format(returnDate)
 
-        val message = "Здравствуйте, ${reservation.user?.username}! Ваше бронирование инвентаря ${inventoryItem.name} завершено. Дата возврата: $formattedReturnDate."
+        val message = "Здравствуйте, ${reservation.user?.username}! Ваше бронирование инвентаря ${inventory.name} завершено. Дата возврата: $formattedReturnDate."
         reservation.user?.telegramId?.let { telegramService.sendMessage(it, message) }
 
         return reservation

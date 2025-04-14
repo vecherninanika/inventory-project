@@ -8,6 +8,7 @@ import ru.itport.sportinventory.models.InventoryDTO
 import ru.itport.sportinventory.services.InventoryService
 import java.util.*
 import org.springframework.format.annotation.DateTimeFormat
+import ru.itport.sportinventory.models.BookingJournalDTO
 import ru.itport.sportinventory.models.inventory.ReserveRq
 import ru.itport.sportinventory.models.inventory.ReturnRq
 import ru.itport.sportinventory.utils.ControllerUtils.Companion.serviceCall
@@ -33,6 +34,11 @@ class InventoryController(
     @GetMapping("/category/{category}")
     fun getInventoryByCategory(@PathVariable category: String): BaseResponse<List<InventoryDTO>> {
         return serviceCall { inventoryService.getInventoryByCategory(category) }
+    }
+
+    @GetMapping("/booked-by-user/{telegramId}")
+    fun getInventoryByUser(@PathVariable telegramId: String): BaseResponse<List<BookingJournalDTO>> {
+        return serviceCall { inventoryService.getInventoryByUser(telegramId) }
     }
 
     @PostMapping("/make-reservation")

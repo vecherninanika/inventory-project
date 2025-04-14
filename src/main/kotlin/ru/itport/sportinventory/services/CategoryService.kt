@@ -27,7 +27,8 @@ class CategoryService @Autowired constructor(
     fun getCategoryById(id: UUID): CategoryDTO {
         val category = dataManager.load(Category::class.java)
             .id(id)
-            .one()
+            .optional()
+            .orElseThrow { PlatformException(ErrorDescriptor.CATEGORY_NOT_FOUND) }
 
         return CategoryDTO(category.id!!, category.name!!)
     }

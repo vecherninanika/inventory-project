@@ -3,8 +3,8 @@ package ru.itport.sportinventory.entity
 import io.jmix.core.metamodel.datatype.EnumClass
 
 enum class Status(private val id: String) : EnumClass<String> {
-    AVAILABLE("A"),
-    BOOKED("B");
+    ACTIVE("A"),
+    ENDED("B");
 
     override fun getId() = id
 

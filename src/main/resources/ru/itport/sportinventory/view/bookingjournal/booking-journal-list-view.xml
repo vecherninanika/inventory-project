@@ -36,7 +36,6 @@
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="createButton" action="bookingJournalsDataGrid.create"/>
             <button id="editButton" action="bookingJournalsDataGrid.edit"/>
-            <button id="readButton" action="bookingJournalsDataGrid.read"/>
             <button id="removeButton" action="bookingJournalsDataGrid.remove"/>
             <simplePagination id="pagination" dataLoader="bookingJournalsDl"/>
         </hbox>
@@ -48,7 +47,6 @@
             <actions>
                 <action id="create" type="list_create"/>
                 <action id="edit" type="list_edit"/>
-                <action id="read" type="list_read"/>
                 <action id="remove" type="list_remove"/>
             </actions>
             <columns resizable="true">
@@ -57,6 +55,7 @@
                 <column property="startDate" header="msg://startDate"/>
                 <column property="endDate" header="msg://endDate"/>
                 <column property="photo" header="msg://photo"/>
+                <column property="status" header="msg://status"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions" visible="false">

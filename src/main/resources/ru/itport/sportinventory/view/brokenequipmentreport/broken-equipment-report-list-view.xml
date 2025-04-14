@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://brokenEquipmentReportListView.title"
+      focusComponent="brokenEquipmentReportsDataGrid">
+    <data>
+        <collection id="brokenEquipmentReportsDc"
+                    class="ru.itport.sportinventory.entity.BrokenEquipmentReport">
+            <fetchPlan extends="_base">
+                <property name="inventory" fetchPlan="_base">
+                    <property name="category" fetchPlan="_base"/>
+                </property>
+                <property name="user" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="brokenEquipmentReportsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from BrokenEquipmentReport e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="brokenEquipmentReportsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="addButton" action="brokenEquipmentReportsDataGrid.add"/>
+            <button id="createButton" action="brokenEquipmentReportsDataGrid.create"/>
+            <button id="editButton" action="brokenEquipmentReportsDataGrid.edit"/>
+            <button id="readButton" action="brokenEquipmentReportsDataGrid.read"/>
+            <button id="refreshButton" action="brokenEquipmentReportsDataGrid.refresh"/>
+            <button id="removeButton" action="brokenEquipmentReportsDataGrid.remove"/>
+            <simplePagination id="pagination" dataLoader="brokenEquipmentReportsDl"/>
+        </hbox>
+        <dataGrid id="brokenEquipmentReportsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="brokenEquipmentReportsDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="add" type="list_add"/>
+                <action id="create" type="list_create"/>
+                <action id="edit" type="list_edit"/>
+                <action id="read" type="list_read"/>
+                <action id="refresh" type="list_refresh"/>
+                <action id="remove" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="inventory"/>
+                <column property="user"/>
+                <column property="description"/>
+                <column property="photo"/>
+                <column property="status"/>
+                <column property="createdDate"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

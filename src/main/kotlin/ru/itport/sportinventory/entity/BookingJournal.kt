@@ -45,4 +45,12 @@ open class BookingJournal {
     @Column(name = "PHOTO", length = 1024)
     var photo: FileRef? = null
 
+    @Column(name = "STATUS")
+    private var status: String? = null
+
+    fun getStatus(): Status? = status?.let { Status.fromId(it) }
+
+    fun setStatus(status: Status?) {
+        this.status = status?.id
+    }
 }

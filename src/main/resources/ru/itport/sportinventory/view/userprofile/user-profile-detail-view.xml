@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
-      title="msg://userDetailView.title"
+      title="msg://userProfileDetailView.title"
       focusComponent="form">
     <data>
-        <instance id="userDc"
-                  class="ru.itport.sportinventory.entity.User">
-            <fetchPlan extends="_base"/>
-            <loader id="userDl"/>
+        <instance id="userProfileDc"
+                  class="ru.itport.sportinventory.entity.UserProfile">
+            <fetchPlan extends="_base">
+                <property name="user" fetchPlan="_instance_name"/>
+            </fetchPlan>
+            <loader id="userProfileDl"/>
         </instance>
     </data>
     <facets>
@@ -17,17 +19,18 @@
         <action id="closeAction" type="detail_close"/>
     </actions>
     <layout>
-        <formLayout id="form" dataContainer="userDc">
+        <formLayout id="form" dataContainer="userProfileDc">
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <textField id="usernameField" property="username"/>
-            <textField id="firstNameField" property="firstName"/>
-            <textField id="lastNameField" property="lastName"/>
-            <textField id="emailField" property="email"/>
-            <checkbox id="activeField" property="active"/>
-            <textField id="timeZoneIdField" property="timeZoneId"/>
+            <entityPicker id="userField" property="user">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <textField id="telegramIdField" property="telegramId"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

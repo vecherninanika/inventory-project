@@ -16,16 +16,39 @@
             <column name="INVENTORY_ID" type="UUID">
                 <constraints nullable="false"/>
             </column>
-            <column name="START_DATE" type="DATETIME">
+            <column name="START_DATE" type="DATE">
                 <constraints nullable="false"/>
             </column>
-            <column name="END_DATE" type="DATETIME">
+            <column name="END_DATE" type="DATE">
                 <constraints nullable="false"/>
             </column>
             <column name="PHOTO" type="VARCHAR(1024)"/>
         </createTable>
     </changeSet>
     <changeSet id="2" author="sport-inventory">
+        <createTable tableName="BROKEN_EQUIPMENT_REPORT">
+            <column name="ID" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_BROKEN_EQUIPMENT_REPORT"/>
+            </column>
+            <column name="INVENTORY_ID" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PHOTO" type="VARCHAR(255)"/>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="sport-inventory">
         <createTable tableName="CATEGORY">
             <column name="ID" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_CATEGORY"/>
@@ -35,7 +58,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="3" author="sport-inventory">
+    <changeSet id="4" author="sport-inventory">
         <createTable tableName="INVENTORY">
             <column name="ID" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_INVENTORY"/>
@@ -53,7 +76,7 @@
             <column name="QUANTITY_FREE" type="INT"/>
         </createTable>
     </changeSet>
-    <changeSet id="4" author="sport-inventory">
+    <changeSet id="5" author="sport-inventory">
         <createTable tableName="LOCATION">
             <column name="ID" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_LOCATION"/>
@@ -63,7 +86,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="5" author="sport-inventory">
+    <changeSet id="6" author="sport-inventory">
         <createTable tableName="TELEGRAM_CHAT">
             <column name="ID" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_TELEGRAM_CHAT"/>
@@ -81,7 +104,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="6" author="sport-inventory">
+    <changeSet id="7" author="sport-inventory">
         <createTable tableName="USER_PROFILE">
             <column name="ID" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_USER_PROFILE"/>
@@ -96,7 +119,7 @@
             <column name="CITY_ID" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="sport-inventory">
+    <changeSet id="8" author="sport-inventory">
         <createIndex indexName="IDX_BOOKING_JOURNAL_INVENTORY" tableName="BOOKING_JOURNAL">
             <column name="INVENTORY_ID"/>
         </createIndex>
@@ -105,7 +128,7 @@
                                  constraintName="FK_BOOKING_JOURNAL_ON_INVENTORY" referencedColumnNames="ID"
                                  referencedTableName="INVENTORY"/>
     </changeSet>
-    <changeSet id="8" author="sport-inventory">
+    <changeSet id="9" author="sport-inventory">
         <createIndex indexName="IDX_BOOKING_JOURNAL_USER" tableName="BOOKING_JOURNAL">
             <column name="USER_ID"/>
         </createIndex>
@@ -114,7 +137,7 @@
                                  constraintName="FK_BOOKING_JOURNAL_ON_USER" onDelete="CASCADE"
                                  referencedColumnNames="ID" referencedTableName="USER_"/>
     </changeSet>
-    <changeSet id="9" author="sport-inventory">
+    <changeSet id="10" author="sport-inventory">
         <createIndex indexName="IDX_INVENTORY_CATEGORY" tableName="INVENTORY">
             <column name="CATEGORY_ID"/>
         </createIndex>
@@ -123,7 +146,7 @@
                                  constraintName="FK_INVENTORY_ON_CATEGORY" onDelete="SET NULL"
                                  referencedColumnNames="ID" referencedTableName="CATEGORY"/>
     </changeSet>
-    <changeSet id="10" author="sport-inventory">
+    <changeSet id="11" author="sport-inventory">
         <createIndex indexName="IDX_TELEGRAM_CHAT_LOCATION_ID" tableName="TELEGRAM_CHAT">
             <column name="LOCATION_ID"/>
         </createIndex>
@@ -132,7 +155,7 @@
                                  constraintName="FK_TELEGRAM_CHAT_ON_LOCATION" referencedColumnNames="ID"
                                  referencedTableName="LOCATION"/>
     </changeSet>
-    <changeSet id="11" author="sport-inventory">
+    <changeSet id="12" author="sport-inventory">
         <createIndex indexName="IDX_USER_PROFILE_CITY" tableName="USER_PROFILE">
             <column name="CITY_ID"/>
         </createIndex>
@@ -141,7 +164,7 @@
                                  constraintName="FK_USER_PROFILE_ON_CITY" onDelete="SET NULL" referencedColumnNames="ID"
                                  referencedTableName="LOCATION"/>
     </changeSet>
-    <changeSet id="12" author="sport-inventory">
+    <changeSet id="13" author="sport-inventory">
         <createIndex indexName="IDX_USER_PROFILE_USER" tableName="USER_PROFILE">
             <column name="USER_ID"/>
         </createIndex>
@@ -149,5 +172,15 @@
         <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="USER_PROFILE"
                                  constraintName="FK_USER_PROFILE_ON_USER" onDelete="SET NULL" referencedColumnNames="ID"
                                  referencedTableName="USER_"/>
+    </changeSet>
+    <changeSet id="14" author="sport-inventory">
+        <addForeignKeyConstraint baseColumnNames="INVENTORY_ID" baseTableName="BROKEN_EQUIPMENT_REPORT"
+                                 constraintName="FK_BROKEN_EQUIPMENT_REPORT_ON_INVENTORY" onDelete="SET NULL"
+                                 referencedColumnNames="ID" referencedTableName="INVENTORY"/>
+    </changeSet>
+    <changeSet id="15" author="sport-inventory">
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="BROKEN_EQUIPMENT_REPORT"
+                                 constraintName="FK_BROKEN_EQUIPMENT_REPORT_ON_USER" onDelete="SET NULL"
+                                 referencedColumnNames="ID" referencedTableName="USER_"/>
     </changeSet>
 </databaseChangeLog>

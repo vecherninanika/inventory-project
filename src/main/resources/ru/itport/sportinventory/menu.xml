@@ -9,6 +9,8 @@
         <item view="Inventory.list" title="msg://ru.itport.sportinventory.view.inventory/inventoryListView.title"/>
         <item view="BookingJournal.list"
               title="msg://ru.itport.sportinventory.view.bookingjournal/bookingJournalListView.title"/>
+        <item view="BrokenEquipmentReport.list"
+              title="msg://ru.itport.sportinventory.view.brokenequipmentreport/brokenEquipmentReportListView.title"/>
     </menu>
 
 </menu-config>
